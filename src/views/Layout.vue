@@ -1,0 +1,249 @@
+<template>
+  <el-container class="main-layout">
+    <el-aside class="main-layout-nav" :width="nav.width">
+      <div class="logo">
+        <h1>{{nav.collapsed ? 'Jay' : 'Jay Blog'}}</h1>
+      </div>
+      <el-menu
+        :collapse="nav.collapsed"
+        :default-active="defaultPath"
+        unique-opened
+        router
+        class="menu"
+      >
+        <template v-for="(item, index) in navList">
+          <el-menu-item
+            v-if="item.children.length == 1"
+            :index="item.children[0].path"
+            :key="index"
+          >
+            <i :class="item.icon"/>
+            <span slot="title">{{ item.title }}</span>
+          </el-menu-item>
+          <el-submenu v-else :key="item.path" :index="item.path">
+            <template slot="title">
+              <i :class="item.icon"/>
+              <span slot="title">{{ item.title }}</span>
+            </template>
+            <template v-for="child in item.children">
+              <el-menu-item
+                v-if="!child.hidden"
+                :key="child.path"
+                :index="child.path"
+              >{{ child.title }}</el-menu-item>
+            </template>
+          </el-submenu>
+        </template>
+      </el-menu>
+    </el-aside>
+    <el-container style="overflow-y: auto;">
+      <el-header height="64px">
+        <el-row>
+          <el-col :span="12" style="padding-top: 20px;">
+            <i :class="navIconCls" @click="collapse"></i>
+          </el-col>
+          <el-col :span="12" style="padding-top: 20px; text-align: right;">
+            <span class="nav-user">
+              您好，{{userName}}
+              <i
+                class="iconfont icon-tuichudenglu"
+                style="color: #409EFF;font-size: 20px;cursor: pointer"
+                title="退出"
+                @click="handleLogout"
+              />
+            </span>
+          </el-col>
+        </el-row>
+      </el-header>
+      <main class="main-layout-content">
+        <aside class="nav-link">
+          <el-breadcrumb separator-class="el-icon-arrow-right">
+            <el-breadcrumb-item
+              v-for="(item, index) in $route.matched"
+              :key="index"
+              :to="{ path: item.path }"
+            >{{item.name}}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </aside>
+        <div class="main">
+          <router-view></router-view>
+        </div>
+      </main>
+    </el-container>
+  </el-container>
+</template>
+
+<script>
+import { mapState, mapMutations } from "vuex";
+export default {
+  data() {
+    return {
+      defaultPath: "",
+      navList: [
+        {
+          path: "/banner",
+          title: "Banner",
+          icon: "iconfont icon-banner",
+          children: [
+            { path: "/banner/list", title: "Banner List" }
+            // { path: '/banner/edit', title: 'Banner Edit'},
+          ]
+        },
+        {
+          title: "Blog",
+          icon: "iconfont icon-huanyingqiapian",
+          children: [
+            { path: "/blog/list", title: "Blog List" }
+            // { path: '/blog/edit',title: 'Blog Edit'},
+          ]
+        },
+        {
+          path: "/music",
+          title: "Music",
+          icon: "iconfont icon-yinle",
+          children: [
+            { path: "/music/list", title: "Music List" }
+            // { path: '/music/edit',  title: 'Music Edit'},
+          ]
+        },
+        {
+          path: "/book",
+          title: "Book",
+          name: "Book",
+          icon: "iconfont icon-shudan",
+          redirect: "/book/list",
+          children: [
+            { path: "/book/list", title: "Book List" }
+            // { path: '/book/edit', title: 'Book Edit'},
+          ]
+        },
+        {
+          path: "/hotSwiper",
+          title: "HotSwiper",
+          icon: "iconfont icon-gongzuojingli",
+          children: [
+            { path: "/hotSwiper/list", title: "HotSwiper List" }
+            // { path: '/hotSwiper/edit', title: 'HotSwiper Edit'},
+          ]
+        },
+        {
+          path: "/sheet",
+          title: "MusicSheet",
+          icon: "iconfont icon-yinle1",
+          children: [
+            { path: "/musicSheet/list", title: "musicSheet List" }
+            // { path: '/musicSheet/edit', title: 'musicSheet Edit'},
+          ]
+        },
+        {
+          path: "/setting",
+          title: "Setting",
+          icon: "iconfont icon-huanyingqiapian",
+          children: [
+            { path: "/setting/blogTypeList", title: "BlogType List" }
+            // { path: '/setting/blogTypeEdit', title: 'BlogType Edit'},
+          ]
+        }
+      ],
+      nav: {
+        width: "250px",
+        collapsed: false
+      }
+    };
+  },
+  watch: {
+    "$route.path": function(value) {
+      this.changeDefaultPath(value.split("/"));
+    }
+  },
+  computed: {
+    navIconCls() {
+      return [
+        "nav-icon iconfont",
+        this.nav.collapsed ? "icon-menufold-right" : "icon-menufold"
+      ];
+    },
+    // ...mapState({
+    //   userName: state => state.userBasic.userName
+    // })
+  },
+  created() {
+    // this.navList = this.$router.options.routes;
+    let _userBasic = window.localStorage.getItem("userBasic");
+    let userBasic = _userBasic ? JSON.parse(_userBasic) : {};
+    this.setBasicInfo(userBasic);
+    this.changeDefaultPath(this.$route.path.split("/"));
+  },
+  methods: {
+    ...mapMutations(["setBasicInfo", "clearBasicInfo"]),
+    collapse() {
+      this.nav.collapsed = !this.nav.collapsed;
+      this.nav.width = this.nav.collapsed ? "64px" : "250px";
+    },
+    changeDefaultPath(routerArr) {
+      let defaultPath = "";
+      if (routerArr.includes("banner")) {
+        defaultPath = "/banner/list";
+      } else if (routerArr.includes("music")) {
+        defaultPath = "/music/list";
+      } else if (routerArr.includes("blog")) {
+        defaultPath = "/blog/list";
+      } else if (routerArr.includes("musicSheet")) {
+        defaultPath = "/musicSheet/list";
+      } else if (routerArr.includes("hotSwiper")) {
+        defaultPath = "/hotSwiper/list";
+      } else if (routerArr.includes("book")) {
+        defaultPath = "/book/list";
+      } else if (
+        routerArr.includes("blogTypeList") ||
+        routerArr.includes("blogTypeEdit")
+      ) {
+        defaultPath = "/setting/blogTypeList";
+      }
+      this.defaultPath = defaultPath;
+    },
+    handleLogout() {
+      this.$confirm("用户将退出登录,您确退出登录?", "退出登录", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        this.clearBasicInfo();
+        this.$router.push("/login");
+      });
+    }
+  }
+};
+</script>
+<style lang="scss">
+@import "@/assets/style/Layout.scss";
+</style>
+<style lang="scss">
+.main-layout {
+  .main-layout-nav {
+    overflow-x: hidden !important;
+  }
+  .main-layout-content {
+    padding: 20px;
+    flex: 1;
+    .nav-link {
+      padding: 10px 0 15px 15px;
+      background: #f0f2f5;
+    }
+    .main {
+      padding: 30px 30px 50px 30px !important;
+      .main-header {
+        display: flex;
+        justify-content: space-between;
+        h3 {
+          font-weight: 400;
+        }
+        .el-button {
+          height: 36px;
+          margin-top: 12px;
+        }
+      }
+    }
+  }
+}
+</style>

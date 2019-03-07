@@ -1,0 +1,35 @@
+{
+  "name": "blog-cms-ts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run serve",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build  --report --mode prd",
+    "qa": "vue-cli-service build --report --mode qa",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@types/nprogress": "0.0.29",
+    "axios": "^0.18.0",
+    "element-ui": "^2.5.4",
+    "nprogress": "^0.2.0",
+    "vue": "^2.6.6",
+    "vue-class-component": "^6.0.0",
+    "vue-lazyload": "^1.2.6",
+    "vue-property-decorator": "^7.0.0",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1",
+    "vuex-class": "^0.3.1",
+    "wangeditor": "^3.1.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.3",
+    "@vue/cli-plugin-typescript": "^3.0.3",
+    "@vue/cli-service": "^3.0.3",
+    "node-sass": "^4.9.0",
+    "sass-loader": "^7.1.0",
+    "typescript": "^3.0.0",
+    "vue-template-compiler": "^2.5.21"
+  }
+}
