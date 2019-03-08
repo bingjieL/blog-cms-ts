@@ -1,10 +1,5 @@
-import {
-  TestTsType
-} from '../types/test-ts';
-
-import {
-  GetterTree,
-} from 'vuex';
+import { TestTsType } from '../types/test-ts';
+import { GetterTree } from 'vuex';
 
 export const State: TestTsType = {
   sum: 0

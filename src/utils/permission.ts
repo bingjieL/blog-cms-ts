@@ -3,12 +3,12 @@ import NProgress from 'nprogress'; // 进度条
 import 'nprogress/nprogress.css'; // 进度条样式
 
 const whiteList: string[] = ['/login']; // 不重定向白名单
-let lUserBasic: any = localStorage.getItem('userBasic')
-const userBasic: any = lUserBasic ? JSON.parse(unescape(lUserBasic)) : {};
-
-router.beforeEach((to: any, from: any, next: any) => {
+router.beforeEach((to, from, next) => {
   NProgress.start()
-  if (userBasic.isLogin) {
+  let  LuserBasic: any =  localStorage.getItem('userBasic')
+  let userBasic: any = JSON.parse(LuserBasic)
+  let isLogin = userBasic ? userBasic.isLogin : false
+  if (isLogin) {
     next()
   } else {
     if (whiteList.includes(to.path)) {

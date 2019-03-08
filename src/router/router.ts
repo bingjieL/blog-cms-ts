@@ -53,8 +53,8 @@ export default new Router({
       component: Layout,
       redirect: '/blog/list',
       children: [
-        { path: '/list', name: 'Blog list', component: BlogList},
-        { path: '/edit', name: 'Blog edit', component: BlogEdit},
+        { path: '/blog/list', name: 'Blog list', component: BlogList},
+        { path: '/blog/edit', name: 'Blog edit', component: BlogEdit},
       ]
     },
     {

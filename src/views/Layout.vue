@@ -20,7 +20,7 @@
             <i :class="item.icon"/>
             <span slot="title">{{ item.title }}</span>
           </el-menu-item>
-          <el-submenu v-else :key="item.path" :index="item.path">
+          <el-submenu v-else :key="index"  :index="item.path">
             <template slot="title">
               <i :class="item.icon"/>
               <span slot="title">{{ item.title }}</span>
@@ -28,7 +28,7 @@
             <template v-for="child in item.children">
               <el-menu-item
                 v-if="!child.hidden"
-                :key="child.path"
+                :key="child.title"
                 :index="child.path"
               >{{ child.title }}</el-menu-item>
             </template>
@@ -73,150 +73,87 @@
   </el-container>
 </template>
 
-<script>
+<script lang='ts'>
 import { mapState, mapMutations } from "vuex";
-export default {
-  data() {
-    return {
-      defaultPath: "",
-      navList: [
-        {
-          path: "/banner",
-          title: "Banner",
-          icon: "iconfont icon-banner",
-          children: [
-            { path: "/banner/list", title: "Banner List" }
-            // { path: '/banner/edit', title: 'Banner Edit'},
-          ]
-        },
-        {
-          title: "Blog",
-          icon: "iconfont icon-huanyingqiapian",
-          children: [
-            { path: "/blog/list", title: "Blog List" }
-            // { path: '/blog/edit',title: 'Blog Edit'},
-          ]
-        },
-        {
-          path: "/music",
-          title: "Music",
-          icon: "iconfont icon-yinle",
-          children: [
-            { path: "/music/list", title: "Music List" }
-            // { path: '/music/edit',  title: 'Music Edit'},
-          ]
-        },
-        {
-          path: "/book",
-          title: "Book",
-          name: "Book",
-          icon: "iconfont icon-shudan",
-          redirect: "/book/list",
-          children: [
-            { path: "/book/list", title: "Book List" }
-            // { path: '/book/edit', title: 'Book Edit'},
-          ]
-        },
-        {
-          path: "/hotSwiper",
-          title: "HotSwiper",
-          icon: "iconfont icon-gongzuojingli",
-          children: [
-            { path: "/hotSwiper/list", title: "HotSwiper List" }
-            // { path: '/hotSwiper/edit', title: 'HotSwiper Edit'},
-          ]
-        },
-        {
-          path: "/sheet",
-          title: "MusicSheet",
-          icon: "iconfont icon-yinle1",
-          children: [
-            { path: "/musicSheet/list", title: "musicSheet List" }
-            // { path: '/musicSheet/edit', title: 'musicSheet Edit'},
-          ]
-        },
-        {
-          path: "/setting",
-          title: "Setting",
-          icon: "iconfont icon-huanyingqiapian",
-          children: [
-            { path: "/setting/blogTypeList", title: "BlogType List" }
-            // { path: '/setting/blogTypeEdit', title: 'BlogType Edit'},
-          ]
-        }
-      ],
-      nav: {
-        width: "250px",
-        collapsed: false
-      }
-    };
-  },
-  watch: {
-    "$route.path": function(value) {
-      this.changeDefaultPath(value.split("/"));
-    }
-  },
-  computed: {
-    navIconCls() {
-      return [
-        "nav-icon iconfont",
-        this.nav.collapsed ? "icon-menufold-right" : "icon-menufold"
-      ];
-    },
-    // ...mapState({
-    //   userName: state => state.userBasic.userName
-    // })
-  },
+import { Component, Vue, Watch} from 'vue-property-decorator';
+import { State, Mutation} from 'vuex-class';
+import { NavList } from '@/utils/navListjson'
+
+interface NavType{
+  width: string,
+  collapsed: boolean
+}
+
+@Component
+export default class Layout extends Vue {
+
+  defaultPath: string =  ""
+  navList: Array<object> = NavList 
+  nav:NavType =  {
+    width: "250px",
+    collapsed: false
+  }
+  get navIconCls() {
+    return [
+      "nav-icon iconfont",
+      this.nav.collapsed ? "icon-menufold-right" : "icon-menufold"
+    ];
+  }
+  @State(state => state.UserBasic.userName) userName: any
+  @Watch('$route.path')
+  pathChange(val: any, oldVal: any) {
+    this.changeDefaultPath(val.split("/"));
+  }
+  @Mutation setBasicInfo: any
+  @Mutation clearBasicInfo: any
   created() {
     // this.navList = this.$router.options.routes;
     let _userBasic = window.localStorage.getItem("userBasic");
     let userBasic = _userBasic ? JSON.parse(_userBasic) : {};
     this.setBasicInfo(userBasic);
     this.changeDefaultPath(this.$route.path.split("/"));
-  },
-  methods: {
-    ...mapMutations(["setBasicInfo", "clearBasicInfo"]),
-    collapse() {
-      this.nav.collapsed = !this.nav.collapsed;
-      this.nav.width = this.nav.collapsed ? "64px" : "250px";
-    },
-    changeDefaultPath(routerArr) {
-      let defaultPath = "";
-      if (routerArr.includes("banner")) {
-        defaultPath = "/banner/list";
-      } else if (routerArr.includes("music")) {
-        defaultPath = "/music/list";
-      } else if (routerArr.includes("blog")) {
-        defaultPath = "/blog/list";
-      } else if (routerArr.includes("musicSheet")) {
-        defaultPath = "/musicSheet/list";
-      } else if (routerArr.includes("hotSwiper")) {
-        defaultPath = "/hotSwiper/list";
-      } else if (routerArr.includes("book")) {
-        defaultPath = "/book/list";
-      } else if (
-        routerArr.includes("blogTypeList") ||
-        routerArr.includes("blogTypeEdit")
-      ) {
-        defaultPath = "/setting/blogTypeList";
-      }
-      this.defaultPath = defaultPath;
-    },
-    handleLogout() {
-      this.$confirm("用户将退出登录,您确退出登录?", "退出登录", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(() => {
-        this.clearBasicInfo();
-        this.$router.push("/login");
-      });
+    console.log('--->  store', this.$store.state)
+  }
+  collapse() {
+    this.nav.collapsed = !this.nav.collapsed;
+    this.nav.width = this.nav.collapsed ? "64px" : "250px";
+  }
+  changeDefaultPath(routerArr: Array<any>) {
+    let defaultPath = "";
+    if (routerArr.includes("banner")) {
+      defaultPath = "/banner/list";
+    } else if (routerArr.includes("music")) {
+      defaultPath = "/music/list";
+    } else if (routerArr.includes("blog")) {
+      defaultPath = "/blog/list";
+    } else if (routerArr.includes("musicSheet")) {
+      defaultPath = "/musicSheet/list";
+    } else if (routerArr.includes("hotSwiper")) {
+      defaultPath = "/hotSwiper/list";
+    } else if (routerArr.includes("book")) {
+      defaultPath = "/book/list";
+    } else if (
+      routerArr.includes("blogTypeList") ||
+      routerArr.includes("blogTypeEdit")
+    ) {
+      defaultPath = "/setting/blogTypeList";
     }
+    this.defaultPath = defaultPath;
+  }
+  handleLogout() {
+    this.$confirm("用户将退出登录,您确退出登录?", "退出登录", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    }).then(() => {
+      this.clearBasicInfo();
+      this.$router.push("/login");
+    });
   }
 };
 </script>
 <style lang="scss">
-@import "@/assets/style/Layout.scss";
+  @import "@/assets/style/Layout.scss";
 </style>
 <style lang="scss">
 .main-layout {
