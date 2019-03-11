@@ -18,9 +18,10 @@
 </template>
 
 <script lang="ts">
-const img_404 =  require ('@/assets/404.png')
-const img_404_cloud =  require('@/assets/404_cloud.png') 
+import img_404 from '@/assets/404.png';
+import img_404_cloud from  '@/assets/404_cloud.png' 
 import {Component, Vue} from 'vue-property-decorator';
+
 @Component
 export default class Error extends Vue {
   img_404: any = img_404

@@ -7,7 +7,7 @@ import {
 } from '../types/test-ts';
 
 const Actions: ActionTree<TestTsType, any> = {
-  add({commit, state: TestTsType}, payload) {
+  add({commit, state}, payload) {
     commit('TEST_ADD', payload)
   }
 }

@@ -25,7 +25,7 @@
                     :on-error="handleAvatarError"
                     :on-success="handleAvatarSuccess"
                     :before-upload="beforeAvatarUpload">
-                        <img v-if="editForm.bookPic" :src="editForm.bookPic" class="avatar">
+                        <img v-if="editForm.bookPic" v-lazy="editForm.bookPic" class="avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                 </el-upload>
             </el-form-item>
@@ -39,130 +39,137 @@
         </el-form>
     </section>
 </template>
-<script>
+<script lang='ts'>
+import {Component, Vue} from 'vue-property-decorator'
 import { AddApi, UpdateApi, FindByIdApi  } from '@/server/book'
-  export default {
-    data() {
-      return {
-        editForm: {
-          bookTitle: '',
-          bookAuthor: '',
-          bookDes: '',
-          bookpdfUrl: '',
-          bookPic: '',
-          bookdlUrl: ''
-        },
-        saveLoading: false,
-        isEdit: false,
-        _mid:null,
-        editRules: {
-          bookTitle: [
-            { required: true, message: '请输入Book Title', trigger: 'blur' }
-          ],
-          bookAuthor: [
-            { required: true, message: '请输入Book Author', trigger: 'blur' }
-          ],
-          bookDes: [
-            { required: true, message: '请输入Book Des', trigger: 'blur' }
-          ],
-          bookpdfUrl: [ 
-            { required: true, message: '请输入Book PDF Url', trigger: 'blur' }
-          ],
-          bookPic: [
-            { required: true, message: '请上传Book Pic', trigger: 'change' }
-          ],
-          bookdlUrl: [
-            { required: true, message: '请填写Book KDL Url ', trigger: 'blur' }
-          ],
-        }
-      };
-    },
-    methods: {
-      submitForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            this.save()
-          } else {
-            return false;
-          } 
-        });
-      },
-      resetForm(formName) {
-        this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$refs[formName].resetFields();
-        }).catch(() => {
-                   
-        });
-      },
-      handleAvatarError(err, file, fileList) {
-          console.log('---> err', err)
-      },
-      handleAvatarSuccess(res, file) {
-        if(res.code=== 200){
-            this.editForm.bookPic = res.data.url
-        }
-      },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg' || 'image/png';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isJPG) {
-          this.$message.error('上传头像图片只能是 JPG 格式!');
-        }
-        if (!isLt2M) {
-          this.$message.error('上传图片大小不能超过 2MB!');
-        }
-        return isJPG && isLt2M;
-      },
-      save() {
-        this.saveLoading = true
-        if(this.isEdit) {
-          UpdateApi(this.editForm).then(res => {
-            this.saveLoading = false
-            if(res.code == 200){
-              this.$message({
-                message: res.message,
-                type: 'success'
-              });
-              this.$router.push('/book/list')
-            }
-          })
-        }else {
-          AddApi(this.editForm).then(res => {
-            this.saveLoading = false
-            if(res.code == 200){
-              this.$message({
-                message: res.message,
-                type: 'success'
-              });
-              this.$router.push('/book/list')
-            }
-          })
-        }
-       
-      },
-      getDetail(id) {
-        FindByIdApi({bookId: id}).then(res => {
-          if(res.code == 200) {
-            this.editForm = res.data
-          }
-        })
-      }
-    },
-    mounted() {
-       let {_mid} = this.$route.query
-        if(_mid){
-            this.isEdit = true
-            this._mid = _mid
-            this.getDetail(_mid)
-        }else{
-            this.isEdit = false
-        }
+
+interface EditFormType {
+    bookTitle: string,
+    bookAuthor: string,
+    bookDes: string,
+    bookpdfUrl: string,
+    bookPic: string,
+    bookdlUrl: string
+}
+
+@Component({})
+export default class BookEdit extends Vue {
+  editForm:EditFormType =  {
+    bookTitle: '',
+    bookAuthor: '',
+    bookDes: '',
+    bookpdfUrl: '',
+    bookPic: '',
+    bookdlUrl: ''
+  }
+  saveLoading: boolean = false
+  isEdit: boolean =  false
+  _mid: any = null
+  editRules: any =  {
+    bookTitle: [
+      { required: true, message: '请输入Book Title', trigger: 'blur' }
+    ],
+    bookAuthor: [
+      { required: true, message: '请输入Book Author', trigger: 'blur' }
+    ],
+    bookDes: [
+      { required: true, message: '请输入Book Des', trigger: 'blur' }
+    ],
+    bookpdfUrl: [ 
+      { required: true, message: '请输入Book PDF Url', trigger: 'blur' }
+    ],
+    bookPic: [
+      { required: true, message: '请上传Book Pic', trigger: 'change' }
+    ],
+    bookdlUrl: [
+      { required: true, message: '请填写Book KDL Url ', trigger: 'blur' }
+    ]
+  }
+  submitForm(formName: string) {
+    (this.$refs[formName] as any).validate((valid: boolean) => {
+      if (valid) {
+        this.save()
+      } else {
+        return false;
+      } 
+    });
+  }
+  resetForm(formName: string) {
+    this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      (this.$refs[formName] as any ).resetFields();
+    }).catch(() => {
+                
+    });
+  }
+  handleAvatarError(err: any, file: any, fileList: any) {
+      console.log('---> err', err)
+  }
+  handleAvatarSuccess(res: any, file: any) {
+    if(res.code=== 200){
+        this.editForm.bookPic = res.data.url
     }
   }
+  beforeAvatarUpload(file: any) {
+    const isJPG = file.type === 'image/jpeg' || 'image/png';
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isJPG) {
+      this.$message.error('上传头像图片只能是 JPG 格式!');
+    }
+    if (!isLt2M) {
+      this.$message.error('上传图片大小不能超过 2MB!');
+    }
+    return isJPG && isLt2M;
+  }
+  save() {
+    this.saveLoading = true
+    if(this.isEdit) {
+      UpdateApi(this.editForm).then((res: any) => {
+        this.saveLoading = false
+        if(res.code == 200){
+          this.$message({
+            message: res.message,
+            type: 'success'
+          });
+          this.$router.push('/book/list')
+        }
+      })
+    }else {
+      AddApi(this.editForm).then((res: any) => {
+        this.saveLoading = false
+        if(res.code == 200){
+          this.$message({
+            message: res.message,
+            type: 'success'
+          });
+          this.$router.push('/book/list')
+        }
+      })
+    }
+  }
+  getDetail(id: any) {
+    FindByIdApi({bookId: id}).then((res: any) => {
+      if(res.code == 200) {
+        this.editForm = res.data
+      }
+    })
+  }
+  mounted() {
+    let {_mid} = this.$route.query
+    if(_mid){
+        this.isEdit = true
+        this._mid = _mid
+        this.getDetail(_mid)
+    }else{
+        this.isEdit = false
+    }
+  }
+}
+
+        
 </script>
 <style lang="scss">
 .edit-wrap{

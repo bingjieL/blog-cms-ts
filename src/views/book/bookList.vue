@@ -62,60 +62,58 @@
     </section>
 </template>
 
-<script>
-import { GetApi, DeleteApi } from '@/server/book'
-export default {
-    data () {
-        return {
-            bookListData: [],
-            count: 0,
-            pageSize: 0,
-        }   
-    },
-    methods: {
-        goAdd(){
-            this.$router.push('/book/edit')
-        },
-        goEdit(rowDetail) {
-          let _id =   rowDetail.bookId
-          this.$router.push({path: '/book/edit', query:{_mid: _id}})
-        },
-        getList(params) {
-            GetApi(params).then(res => {
+<script lang='ts'>
+import {Component, Vue} from 'vue-property-decorator';
+import { GetApi, DeleteApi } from '@/server/book';
+
+@Component({})
+export default class BookList extends Vue {
+    bookListData:any[] = []
+    count: number =  0
+    pageSize: number =  0
+    goAdd(){
+        this.$router.push('/book/edit')
+    }
+    goEdit(rowDetail: any) {
+        let _id =   rowDetail.bookId
+        this.$router.push({path: '/book/edit', query:{_mid: _id}})
+    }
+    getList(params: any) {
+        GetApi(params).then((res: any) => {
+            if(res.code == 200) {
+                this.bookListData = res.data.rows
+                this.count = res.data.count
+            }
+        })
+    }
+    deleteBaner(rowDetail: any) {
+        let _id =   rowDetail.bookId
+        let params = {
+            bookId: _id
+        }
+        this.$confirm('点击确认将删除此条数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+        }).then(() => {
+            DeleteApi(params).then((res: any) => {
                 if(res.code == 200) {
-                    this.bookListData = res.data.rows
-                    this.count = res.data.count
+                    this.$message({
+                        message: res.message,
+                        type: 'success'
+                    });
+                    this.getList({})
                 }
             })
-        },
-        deleteBaner(rowDetail) {
-            let _id =   rowDetail.bookId
-            let params = {
-                bookId: _id
-            }
-            this.$confirm('点击确认将删除此条数据, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-            }).then(() => {
-               DeleteApi(params).then(res => {
-                   if(res.code == 200) {
-                        this.$message({
-                            message: res.message,
-                            type: 'success'
-                        });
-                        this.getList({})
-                   }
-               })
-            }).catch(() => {
-                    
-            });
-        }
-    },
+        }).catch(() => {
+                
+        });
+    }
     mounted() {
         this.getList({})
     }
 }
+
 </script>
 
 <style lang='scss'>

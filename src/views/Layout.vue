@@ -74,7 +74,6 @@
 </template>
 
 <script lang='ts'>
-import { mapState, mapMutations } from "vuex";
 import { Component, Vue, Watch} from 'vue-property-decorator';
 import { State, Mutation} from 'vuex-class';
 import { NavList } from '@/utils/navListjson'

@@ -30,119 +30,123 @@
         </el-form>
     </section>
 </template>
-<script>
+<script lang='ts'>
+import { Component, Vue } from 'vue-property-decorator';
 import { AddApi, UpdateApi, FindByIdApi  } from '@/server/hotSwiper'
-  export default {
-    data() {
-      return {
-        editForm: {
-          hotTitle: '',
-          hotImg: '',
-          hotUrl: ''
-        },
-        saveLoading: false,
-        isEdit: false,
-        _bid:null,
-        editRules: {
-          hotTitle: [
-            { required: true, message: '请输入HotSwiper Title', trigger: 'blur' }
-          ],
-          hotUrl: [
-            { required: true, message: '请输入HotSwiper Url', trigger: 'blur' }
-          ],
-          hotImg: [
-            { required: true, message: '请上传HotSwiper Image', trigger: 'change' }
-          ],
-        }
-      };
-    },
-    methods: {
-      submitForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            this.save()
-          } else {
-            return false;
-          } 
-        });
-      },
-      resetForm(formName) {
-        this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$refs[formName].resetFields();
-        }).catch(() => {
-                   
-        });
-      },
-      handleAvatarError(err, file, fileList) {
-          console.log('---> err', err)
-      },
-      handleAvatarSuccess(res, file) {
-        if(res.code=== 200){
-            this.editForm.hotImg = res.data.url
-            console.log('----> this.editForm.hotImg', this.editForm.hotImg)
-        }
-      },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg' || 'image/png';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isJPG) {
-          this.$message.error('上传头像图片只能是 JPG 格式!');
-        }
-        if (!isLt2M) {
-          this.$message.error('上传图片大小不能超过 2MB!');
-        }
-        return isJPG && isLt2M;
-      },
-      save() {
-        this.saveLoading = true
-        if(this.isEdit) {
-          UpdateApi(this.editForm).then(res => {
-            this.saveLoading = false
-            if(res.code == 200){
-              this.$message({
-                message: res.message,
-                type: 'success'
-              });
-              this.$router.push('/hotSwiper/list')
-            }
-          })
-        }else {
-          AddApi(this.editForm).then(res => {
-            this.saveLoading = false
-            if(res.code == 200){
-              this.$message({
-                message: res.message,
-                type: 'success'
-              });
-              this.$router.push('/hotSwiper/list')
-            }
-          })
-        }
-       
-      },
-      getDetail(id) {
-        FindByIdApi({hotId: id}).then(res => {
-          if(res.code == 200) {
-            this.editForm = res.data
-          }
-        })
-      }
-    },
-    mounted() {
-       let {_bid} = this.$route.query
-        if(_bid){
-            this.isEdit = true
-            this._bid = _bid
-            this.getDetail(_bid)
-        }else{
-            this.isEdit = false
-        }
+
+interface EditFormType {
+  hotTitle: string,
+  hotImg: string,
+  hotUrl: string
+}
+
+@Component({})
+export default class HotSwiperEdit extends Vue{
+  editForm: EditFormType = {
+    hotTitle: '',
+    hotImg: '',
+    hotUrl: ''
+  }
+  saveLoading:boolean =  false
+  isEdit: boolean = false
+  _bid: any = null
+  editRules: any =  {
+    hotTitle: [
+      { required: true, message: '请输入HotSwiper Title', trigger: 'blur' }
+    ],
+    hotUrl: [
+      { required: true, message: '请输入HotSwiper Url', trigger: 'blur' }
+    ],
+    hotImg: [
+      { required: true, message: '请上传HotSwiper Image', trigger: 'change' }
+    ],
+  }
+
+  submitForm(formName: string) {
+    (this.$refs[formName] as any ).validate((valid: boolean ) => {
+      if (valid) {
+        this.save()
+      } else {
+        return false;
+      } 
+    });
+  }
+  resetForm(formName: string) {
+    this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      (this.$refs[formName] as any).resetFields();
+    }).catch(() => {
+                
+    });
+  }
+  handleAvatarError(err: any, file: any, fileList: any) {
+      console.log('---> err', err)
+  }
+  handleAvatarSuccess(res: any, file: any) {
+    if(res.code=== 200){
+        this.editForm.hotImg = res.data.url
+        console.log('----> this.editForm.hotImg', this.editForm.hotImg)
     }
   }
+  beforeAvatarUpload(file: any) {
+    const isJPG = file.type === 'image/jpeg' || 'image/png';
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isJPG) {
+      this.$message.error('上传头像图片只能是 JPG 格式!');
+    }
+    if (!isLt2M) {
+      this.$message.error('上传图片大小不能超过 2MB!');
+    }
+    return isJPG && isLt2M;
+  }
+  save() {
+    this.saveLoading = true
+    if(this.isEdit) {
+      UpdateApi(this.editForm).then((res: any) => {
+        this.saveLoading = false
+        if(res.code == 200){
+          this.$message({
+            message: res.message,
+            type: 'success'
+          });
+          this.$router.push('/hotSwiper/list')
+        }
+      })
+    }else {
+      AddApi(this.editForm).then((res: any) => {
+        this.saveLoading = false
+        if(res.code == 200){
+          this.$message({
+            message: res.message,
+            type: 'success'
+          });
+          this.$router.push('/hotSwiper/list')
+        }
+      })
+    }
+  }
+  getDetail(id: any) {
+    FindByIdApi({hotId: id}).then((res:any) => {
+      if(res.code == 200) {
+        this.editForm = res.data
+      }
+    })
+  }
+  mounted() {
+    let {_bid} = this.$route.query
+    if(_bid){
+        this.isEdit = true
+        this._bid = _bid
+        this.getDetail(_bid)
+    }else{
+        this.isEdit = false
+    }
+  }
+}
+  
 </script>
 <style lang="scss">
 .edit-wrap{

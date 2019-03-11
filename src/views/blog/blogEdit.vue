@@ -26,7 +26,7 @@
                     :on-error="handleAvatarError"
                     :on-success="handleAvatarSuccess"
                     :before-upload="beforeAvatarUpload">
-                        <img v-if="editForm.blogImg" :src="editForm.blogImg" class="avatar">
+                        <img v-if="editForm.blogImg" v-lazy="editForm.blogImg" class="avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                 </el-upload>
             </el-form-item>
@@ -53,158 +53,166 @@
        
     </section>
 </template>
-<script>
-import {GetBlogTypeApi, AddApi, UpdateApi, FindByIdApi  } from '@/server/blog'
-import WangEdit from '@/components/wangedit.vue'
-// catchData
-  export default {
-    components: {
+<script lang='ts'>
+import { Component, Vue} from 'vue-property-decorator';
+
+import {GetBlogTypeApi, AddApi, UpdateApi, FindByIdApi  } from '@/server/blog';
+import WangEdit from '@/components/wangedit.vue';
+
+interface editFormType {
+    blogTitle: string,
+    blogDes: string,
+    blogContent: string,
+    blog_type_id: string,
+    blogImg: string
+}
+interface editorOptionType {
+    placeholder: string,
+    theme: string
+}
+
+@Component({
+    components:{
         WangEdit
-    },
-    data() {
-      return {
-        editForm: {
-            blogTitle: '',
-            blogDes: '',
-            blogContent: '',
-            blog_type_id: '',
-            blogImg: ''
-        },
-        defaultContent: '',
-        saveLoading: false,
-        isEdit: false,
-        _mid:null,
-        editRules: {
-          blogTitle: [
-            { required: true, message: '请输入Blog Title', trigger: 'blur' }
-          ],
-          blogDes: [
-            { required: true, message: '请输入Blog Des', trigger: 'blur' }
-          ],
-          blogImg: [
-            { required: true, message: '请上传Blog Image', trigger: 'blur' }
-          ],
-          blogContent: [
-            { required: true, message: '请输入Blog Content', trigger: 'blur' }
-          ],
-          blog_type_id: [
-            { required: true, message: '请选择Blog Type', trigger: 'change' }
-          ]
-        },
-        editorOption:{
-            placeholder: '请输入blog内容',
-            theme: 'snow'
-        },
-        blogTypeData:[]
-      };
-    },
-    methods: {
-        catchData(html) {
-            // console.log('----> html', html)
-            this.editForm.blogContent = html
-        },
-        onEditorReady(editor) { // 准备编辑器
+    }
+})
+export default class BlogEdit extends Vue {
+    editForm:editFormType = {
+        blogTitle: '',
+        blogDes: '',
+        blogContent: '',
+        blog_type_id: '',
+        blogImg: ''
+    }
+    defaultContent:string = ''
+    saveLoading: boolean =  false
+    isEdit: boolean =  false
+    _mid: any = null
+    editRules: any = {
+        blogTitle: [
+        { required: true, message: '请输入Blog Title', trigger: 'blur' }
+        ],
+        blogDes: [
+        { required: true, message: '请输入Blog Des', trigger: 'blur' }
+        ],
+        blogImg: [
+        { required: true, message: '请上传Blog Image', trigger: 'blur' }
+        ],
+        blogContent: [
+        { required: true, message: '请输入Blog Content', trigger: 'blur' }
+        ],
+        blog_type_id: [
+        { required: true, message: '请选择Blog Type', trigger: 'change' }
+        ]
+    }
+    editorOption:editorOptionType = {
+        placeholder: '请输入blog内容',
+        theme: 'snow'
+    }
+    blogTypeData: any[] = []
+    catchData(html: string) {
+        // console.log('----> html', html)
+        this.editForm.blogContent = html
+    }
+    onEditorReady(editor: any) { // 准备编辑器
 
-        },
-        onEditorBlur(){}, // 失去焦点事件
-        onEditorFocus(){}, // 获得焦点事件
-        onEditorChange(val){
-            
-            // val.replace(/\s/g,'')
-        }, // 内容改变事件
-        // 转码
-        escapeStringHTML(str) {
-            str = str.replace(/&lt;/g,'<');
-            str = str.replace(/&gt;/g,'>');
-            return str;
-        },
-
-        submitForm(formName) {
-            this.$refs[formName].validate((valid) => {
-            if (valid) {
-                this.save()
-            } else {
-                return false;
-            } 
-            });
-        },
-        resetForm(formName) {
-            this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-            }).then(() => {
-            this.$refs[formName].resetFields();
-            }).catch(() => {
-                    
-            });
-        },
-        save() {
-            this.saveLoading = true
-            if(this.isEdit) {
-                UpdateApi(this.editForm).then(res => {
-                    this.saveLoading = false
-                    if(res.code == 200){
-                    this.$message({
-                        message: res.message,
-                        type: 'success'
-                    });
-                    this.$router.push('/blog/list')
-                    }
-                }).catch(err => {
-                    this.saveLoading = false
-                })
-            }else {
-                AddApi(this.editForm).then(res => {
-                    this.saveLoading = false
-                    if(res.code == 200){
-                    this.$message({
-                        message: res.message,
-                        type: 'success'
-                    });
-                    this.$router.push('/blog/list')
-                    }
-                }).catch(err => {
-                    this.saveLoading = false
-                })
-            }
-        
-        },
-        handleAvatarError(err, file, fileList) {
-            console.log('---> err', err)
-        },
-        handleAvatarSuccess(res, file) {
-            if(res.code=== 200){
-                this.editForm.blogImg = res.data.url
-            }
-        },
-        beforeAvatarUpload(file) {
-            const isJPG = file.type === 'image/jpeg' || 'image/png';
-            const isLt2M = file.size / 1024 / 1024 < 2;
-            if (!isJPG) {
-            this.$message.error('上传头像图片只能是 JPG 格式!');
-            }
-            if (!isLt2M) {
-            this.$message.error('上传图片大小不能超过 2MB!');
-            }
-            return isJPG && isLt2M;
-        },
-        getBlogType() {
-            GetBlogTypeApi().then(res => {
+    }
+    onEditorBlur(){} // 失去焦点事件
+    onEditorFocus(){} // 获得焦点事件
+    onEditorChange(val: string){
+        // val.replace(/\s/g,'')
+    } // 内容改变事件
+    // 转码
+    escapeStringHTML(str: string) {
+        str = str.replace(/&lt;/g,'<');
+        str = str.replace(/&gt;/g,'>');
+        return str;
+    }
+    submitForm(formName: any) {
+        (this.$refs[formName] as any).validate((valid: boolean) => {
+        if (valid) {
+            this.save()
+        } else {
+            return false;
+        } 
+        });
+    }
+    resetForm(formName: string) {
+        this.$confirm('点击确认将重置已填写数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+        }).then(() => {
+        (this.$refs[formName] as any ).resetFields();
+        }).catch(() => {
+                
+        });
+    }
+    save() {
+        this.saveLoading = true
+        if(this.isEdit) {
+            UpdateApi(this.editForm).then((res: any) => {
+                this.saveLoading = false
                 if(res.code == 200){
-                    this.blogTypeData = res.data.rows
+                this.$message({
+                    message: res.message,
+                    type: 'success'
+                });
+                this.$router.push('/blog/list')
                 }
+            }).catch(err => {
+                this.saveLoading = false
             })
-        },
-        getDetail(id) {
-            FindByIdApi({blogId: id}).then(res => {
-                if(res.code == 200) {
-                    this.editForm = res.data
-                    this.defaultContent = this.editForm.blogContent
+        }else {
+            AddApi(this.editForm).then((res: any) => {
+                this.saveLoading = false
+                if(res.code == 200){
+                this.$message({
+                    message: res.message,
+                    type: 'success'
+                });
+                this.$router.push('/blog/list')
                 }
+            }).catch(err => {
+                this.saveLoading = false
             })
         }
-    },
+    
+    }
+    handleAvatarError(err: any, file: any, fileList: any) {
+        console.log('---> err', err)
+    }
+    handleAvatarSuccess(res: any, file: any) {
+        if(res.code=== 200){
+            this.editForm.blogImg = res.data.url
+        }
+    }
+    beforeAvatarUpload(file: any) {
+        const isJPG = file.type === 'image/jpeg' || 'image/png';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+    }
+    getBlogType() {
+        GetBlogTypeApi({}).then((res: any) => {
+            if(res.code == 200){
+                this.blogTypeData = res.data.rows
+            }
+        })
+    }
+    getDetail(id: any) {
+        FindByIdApi({blogId: id}).then((res: any) => {
+            if(res.code == 200) {
+                this.editForm = res.data
+                this.defaultContent = this.editForm.blogContent
+            }
+        })
+    }
     mounted() {
         this.getBlogType()
         let {_mid} = this.$route.query
@@ -216,7 +224,8 @@ import WangEdit from '@/components/wangedit.vue'
             this.isEdit = false
         }
     }
-  }
+}
+
 </script>
 <style lang="scss">
 .ql-editor {

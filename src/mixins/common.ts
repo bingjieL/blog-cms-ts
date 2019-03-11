@@ -1,5 +1,6 @@
 import { hostUrl } from '@/server/apiConfig';
 import { Vue, Component } from 'vue-property-decorator';
+
 declare module 'vue/types/vue' {
   interface Vue {
     $uploadUrl: string;

@@ -1,3 +1,3 @@
-export interface userBasicType {
-    userName: string
-}
+export interface UserBasicype {
+    userName: string,
+};
