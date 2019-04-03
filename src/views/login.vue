@@ -61,8 +61,8 @@ export default class Login extends Vue {
     (this.$refs.loginForm as any).validate((valid: boolean) => {
       if (valid) {
         this.loginLoading = true;
-        this.loginLoading = false;
         LoginApi(this.form).then((res: any) => {
+          this.loginLoading = false;
           if (res.code === 200) {
             let { userName } = res.data;
             let redirect: any = this.$route.query.redirect;
