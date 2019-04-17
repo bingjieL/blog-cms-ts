@@ -42,6 +42,8 @@
 <script lang='ts'>
 import {Component, Vue} from 'vue-property-decorator'
 import { AddApi, UpdateApi, FindByIdApi  } from '@/server/book'
+import CommonMixins from '@/mixins/common';
+
 
 interface EditFormType {
     bookTitle: string,
@@ -52,7 +54,9 @@ interface EditFormType {
     bookdlUrl: string
 }
 
-@Component({})
+@Component({
+  mixins: [CommonMixins]
+})
 export default class BookEdit extends Vue {
   editForm:EditFormType =  {
     bookTitle: '',

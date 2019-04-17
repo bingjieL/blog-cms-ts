@@ -33,6 +33,7 @@
 <script lang='ts'>
 import { Component, Vue } from 'vue-property-decorator';
 import { AddApi, UpdateApi, FindByIdApi  } from '@/server/hotSwiper'
+import CommonMixins from '@/mixins/common';
 
 interface EditFormType {
   hotTitle: string,
@@ -40,7 +41,9 @@ interface EditFormType {
   hotUrl: string
 }
 
-@Component({})
+@Component({
+  mixins: [CommonMixins]
+})
 export default class HotSwiperEdit extends Vue{
   editForm: EditFormType = {
     hotTitle: '',

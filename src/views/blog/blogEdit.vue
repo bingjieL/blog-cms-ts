@@ -58,6 +58,7 @@ import { Component, Vue} from 'vue-property-decorator';
 
 import {GetBlogTypeApi, AddApi, UpdateApi, FindByIdApi  } from '@/server/blog';
 import WangEdit from '@/components/wangedit.vue';
+import CommonMixins from '@/mixins/common';
 
 interface editFormType {
     blogTitle: string,
@@ -72,6 +73,7 @@ interface editorOptionType {
 }
 
 @Component({
+    mixins: [CommonMixins],
     components:{
         WangEdit
     }

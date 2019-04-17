@@ -59,6 +59,8 @@
 <script lang='ts'>
 import { Component, Vue } from "vue-property-decorator";
 import { AddApi, UpdateApi, FindByIdApi } from "@/server/music";
+import CommonMixins from '@/mixins/common';
+
 
 interface EditFormType {
   musicTitle: string;
@@ -67,7 +69,9 @@ interface EditFormType {
   musicPic: string;
   musicLrc: string;
 }
-@Component({})
+@Component({
+  mixins: [CommonMixins]
+})
 export default class MusicEdit extends Vue {
   editForm: EditFormType = {
     musicTitle: "",

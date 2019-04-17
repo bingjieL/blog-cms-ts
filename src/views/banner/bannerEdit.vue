@@ -30,13 +30,16 @@
 <script lang='ts'>
 import {Component, Vue} from 'vue-property-decorator';
 import { AddApi, UpdateApi, FindByIdApi  } from '@/server/banner'
+import CommonMixins from '@/mixins/common';
 
 interface editFormType {
   bannerTitle: string,
   bannerImg: string
 }
 
-@Component
+@Component({
+  mixins: [CommonMixins]
+})
 export default class BannerEdit extends Vue {
   editForm: editFormType = {
     bannerTitle: '',

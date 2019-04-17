@@ -54,6 +54,7 @@
 <script lang='ts'>
 import { Component, Vue } from "vue-property-decorator";
 import { AddApi, UpdateApi, FindByIdApi } from "@/server/musicSheet";
+import CommonMixins from '@/mixins/common';
 
 interface EditFormType {
   sheetTitle: string;
@@ -63,7 +64,9 @@ interface EditFormType {
   sheetDes: string;
 }
 
-@Component({})
+@Component({
+  mixins: [CommonMixins]
+})
 export default class MsuciSheetEdit extends Vue {
   editForm: EditFormType = {
     sheetTitle: "",
