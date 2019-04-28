@@ -111,7 +111,6 @@ export default class Layout extends Vue {
     let userBasic = _userBasic ? JSON.parse(_userBasic) : {};
     this.setBasicInfo(userBasic);
     this.changeDefaultPath(this.$route.path.split("/"));
-    console.log('--->  store', this.$store.state)
   }
   collapse() {
     this.nav.collapsed = !this.nav.collapsed;

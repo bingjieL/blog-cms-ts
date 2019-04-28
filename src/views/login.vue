@@ -66,9 +66,10 @@ export default class Login extends Vue {
           if (res.code === 200) {
             let { userName } = res.data;
             let redirect: any = this.$route.query.redirect;
+            let time = (new Date()).valueOf()
             window.localStorage.setItem(
               "userBasic",
-              JSON.stringify({ userName, isLogin: true })
+              JSON.stringify({ userName, isLogin: true ,time})
             );
             this.$message.success("登录成功！");
             this.setBasicInfo({ userName });
